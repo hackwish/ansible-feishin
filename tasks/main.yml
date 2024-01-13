@@ -1,0 +1,53 @@
+# tasks file for ansible-feishin
+- name: Get latest Release from feishin
+  shell: curl -Lo /tmp/feishin.tar.xz https://github.com/jeffvli/feishin/releases/download/$(curl -s https://api.github.com/repos/jeffvli/feishin/releases/latest | grep tag_name | cut -d '"' -f 4 )/Feishin-$(curl -s https://api.github.com/repos/jeffvli/feishin/releases/latest | grep tag_name | cut -d '"' -f 4 |  tr -d v)-{{ ansible_system | lower }}-x64.tar.xz
+  args:
+    warn: no
+  when: ansible_architecture == 'x86_64'
+  tags: feishin
+
+- name: Create opt directory for feishin install
+  file:
+    path: /opt/feishin/
+    state: directory
+    mode: '0755'
+  tags: feishin
+
+- name: Uncompress feishin
+  shell: tar --strip-components=1 -C /opt/feishin/ -xvf /tmp/feishin.tar.xz Feishin-$(curl -s https://api.github.com/repos/jeffvli/feishin/releases/latest | grep tag_name | cut -d '"' -f 4 |  tr -d v)-{{ ansible_system | lower }}-x64
+  args:
+    warn: no
+  when: ansible_architecture == 'x86_64'
+  tags: feishin
+
+# - name: Unarchive a file
+#   unarchive:
+#     src: /tmp/feishin.tar.xz
+#     dest: /opt/feishin
+#   tags: feishin
+
+- name: Configure feishin on system bin.
+  file:
+    src: "/opt/feishin/feishin"
+    dest: "/usr/local/bin/feishin"
+    state: link
+  tags: feishin
+
+- name: Add Feishin Application Icon
+  copy:
+    src: "{{ role_path }}/files/feishin.png"
+    dest: /opt/feishin/feishin.png
+
+- name: Feishin Application Desktop
+  template:
+    src: Feishin.desktop.j2
+    dest: /usr/share/applications/Feishin.desktop
+  tags: feishin
+
+# - name: Change file ownership, group and permissions
+#   ansible.builtin.file:
+#     path: /usr/local/bin/feishin
+#     owner: root
+#     group: root
+#     mode: '0755'
+#   tags: feishin
