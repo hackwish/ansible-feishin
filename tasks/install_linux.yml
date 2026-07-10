@@ -1,0 +1,71 @@
+---
+- name: Resolve latest Feishin release tag
+  uri:
+    url: https://api.github.com/repos/jeffvli/feishin/releases/latest
+    method: GET
+    return_content: true
+  register: feishin_release_info
+  when: feishin_version == 'latest'
+
+- name: Set Feishin release tag
+  set_fact:
+    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default(feishin_version) }}"
+  when: feishin_version == 'latest'
+
+- name: Determine supported Linux architecture mapping
+  set_fact:
+    feishin_linux_deb_arch: >-
+      {%- if ansible_facts['architecture'] in ['x86_64', 'amd64'] -%}amd64{%- elif ansible_facts['architecture'] in ['aarch64', 'arm64'] -%}arm64{%- else -%}unsupported{%- endif -%}
+    feishin_linux_appimage_arch: >-
+      {%- if ansible_facts['architecture'] in ['x86_64', 'amd64'] -%}x86_64{%- elif ansible_facts['architecture'] in ['aarch64', 'arm64'] -%}arm64{%- else -%}unsupported{%- endif -%}
+
+- name: Assert supported Linux architecture
+  assert:
+    that:
+    - feishin_linux_deb_arch != 'unsupported'
+    - feishin_linux_appimage_arch != 'unsupported'
+    fail_msg: "Feishin does not provide official Linux packages for architecture {{ ansible_facts['architecture'] }}"
+
+- name: Download Debian/Ubuntu package
+  get_url:
+    url: "https://github.com/jeffvli/feishin/releases/download/{{ feishin_release_tag }}/Feishin-linux-{{ feishin_linux_deb_arch }}.deb"
+    dest: "{{ feishin_tmp_archive }}"
+    force: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Install Debian/Ubuntu package
+  apt:
+    deb: "{{ feishin_tmp_archive }}"
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Ensure installation directory exists for AppImage
+  file:
+    path: "{{ feishin_install_dir }}"
+    state: directory
+    mode: '0755'
+  when: ansible_facts['os_family'] != 'Debian'
+
+- name: Download Feishin AppImage for non-Debian Linux
+  get_url:
+    url: "https://github.com/jeffvli/feishin/releases/download/{{ feishin_release_tag }}/Feishin-linux-{{ feishin_linux_appimage_arch }}.AppImage"
+    dest: "{{ feishin_install_dir }}/feishin.AppImage"
+    mode: '0755'
+    force: true
+  when: ansible_facts['os_family'] != 'Debian'
+
+- name: Create launcher symlink for AppImage
+  file:
+    src: "{{ feishin_install_dir }}/feishin.AppImage"
+    dest: "{{ feishin_bin_path }}"
+    state: link
+    force: true
+  when: ansible_facts['os_family'] != 'Debian'
+
+- name: Install desktop entry
+  template:
+    src: Feishin.desktop.j2
+    dest: "{{ feishin_desktop_entry_path }}"
+  when:
+  - feishin_create_desktop_entry | bool
+  - ansible_facts['os_family'] in ['Debian', 'RedHat']

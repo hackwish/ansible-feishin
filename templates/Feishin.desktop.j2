@@ -2,8 +2,8 @@
 Version=3.5.2
 Name=Feishin
 Comment=A modern self-hosted music player
-Exec=/usr/local/bin/feishin %U
-Icon=/opt/feishin/feishin.png
+Exec={{ feishin_bin_path }} %U
+Icon={{ feishin_install_dir }}/feishin.png
 Terminal=false
 StartupWMClass=Feishin Music Player
 Type=Application

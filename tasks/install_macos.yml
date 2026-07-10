@@ -1,0 +1,39 @@
+---
+- name: Resolve latest Feishin release tag
+  uri:
+    url: https://api.github.com/repos/jeffvli/feishin/releases/latest
+    method: GET
+    return_content: true
+  register: feishin_release_info
+  when: feishin_version == 'latest'
+
+- name: Set Feishin release tag
+  set_fact:
+    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default(feishin_version) }}"
+  when: feishin_version == 'latest'
+
+- name: Determine macOS DMG asset name
+  set_fact:
+    feishin_macos_dmg_name: >-
+      Feishin-{{ feishin_release_tag | replace('v', '') }}-mac-{{ (ansible_facts['architecture'] | replace('x86_64', 'x64') | replace('aarch64', 'arm64')) }}.dmg
+
+- name: Download Feishin DMG
+  get_url:
+    url: "https://github.com/jeffvli/feishin/releases/download/{{ feishin_release_tag }}/{{ feishin_macos_dmg_name }}"
+    dest: "{{ feishin_tmp_archive }}"
+    force: true
+
+- name: Mount Feishin DMG
+  command: hdiutil attach -nobrowse -quiet "{{ feishin_tmp_archive }}"
+  register: feishin_dmg_attach
+  changed_when: false
+
+- name: Copy Feishin app bundle to Applications
+  copy:
+    src: "{{ feishin_dmg_attach.stdout | regex_search('/Volumes/[^\\s]+') }}/Feishin.app"
+    dest: "/Applications/"
+    remote_src: true
+
+- name: Detach Feishin DMG
+  command: hdiutil detach -quiet "{{ feishin_dmg_attach.stdout | regex_search('/Volumes/[^\\s]+') }}"
+  changed_when: false

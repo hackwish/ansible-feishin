@@ -1,2 +1,4 @@
 ---
-# vars file for ansible-feishin
+feishin_package_platform: "linux"
+feishin_package_arch: "x64"
+feishin_release_tag: "{{ feishin_version }}"

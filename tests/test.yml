@@ -1,5 +1,8 @@
-- hosts: localhost
-  remote_user: root
+---
+- name: Test Feishin role
+  hosts: localhost
+  connection: local
+  gather_facts: true
   become: true
   roles:
-  - ansible-feishin
+  - role: ansible-feishin

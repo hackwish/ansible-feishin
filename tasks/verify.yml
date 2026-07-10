@@ -1,0 +1,11 @@
+---
+- name: Check Feishin binary exists
+  stat:
+    path: "{{ feishin_bin_path }}"
+  register: feishin_bin_stat
+
+- name: Assert Feishin is installed
+  assert:
+    that:
+    - feishin_bin_stat.stat.exists | bool
+    fail_msg: "Feishin binary was not installed successfully"

@@ -1,2 +1,8 @@
 ---
-# defaults file for ansible-feishin
+feishin_version: "latest"
+feishin_install_dir: "/opt/feishin"
+feishin_bin_path: "/usr/bin/feishin"
+feishin_tmp_archive: "/tmp/feishin-package"
+feishin_create_desktop_entry: true
+feishin_desktop_entry_path: "/usr/share/applications/Feishin.desktop"
+feishin_macos_app_path: "/Applications/Feishin.app"

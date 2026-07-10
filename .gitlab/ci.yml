@@ -1,0 +1,17 @@
+stages:
+- lint
+- test
+
+lint:
+  image: python:3.11
+  stage: lint
+  script:
+  - pip install ansible-lint yamllint
+  - ansible-lint .
+
+syntax-check:
+  image: python:3.11
+  stage: test
+  script:
+  - pip install ansible-core
+  - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
