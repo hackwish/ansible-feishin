@@ -23,7 +23,17 @@
     dest: "{{ feishin_tmp_archive }}"
     force: true
 
-- name: Create mount point directory
+- name: Detach any stale mount at mount point
+  command: hdiutil detach -quiet "/tmp/feishin-mount"
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove stale mount point directory
+  file:
+    path: "/tmp/feishin-mount"
+    state: absent
+
+- name: Create fresh mount point directory
   file:
     path: "/tmp/feishin-mount"
     state: directory
