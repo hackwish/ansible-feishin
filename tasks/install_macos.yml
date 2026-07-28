@@ -48,16 +48,20 @@
     msg: "DMG file not found at {{ feishin_tmp_archive }}. Download may have failed."
   when: not feishin_dmg_stat.stat.exists
 
+- name: Validate downloaded DMG
+  command: file "{{ feishin_tmp_archive }}"
+  register: feishin_dmg_file_check
+  changed_when: false
+  failed_when: "'Apple Disk Image' not in feishin_dmg_file_check.stdout"
+
 - name: Mount Feishin DMG
   command: hdiutil attach -nobrowse -mountpoint "/tmp/feishin-mount" "{{ feishin_tmp_archive }}"
   register: feishin_dmg_attach
   changed_when: false
 
 - name: Copy Feishin app bundle to Applications
-  copy:
-    src: "/tmp/feishin-mount/Feishin.app"
-    dest: "/Applications/"
-    remote_src: true
+  command: ditto "/tmp/feishin-mount/Feishin.app" "/Applications/Feishin.app"
+  changed_when: true
 
 - name: Detach Feishin DMG
   command: hdiutil detach -quiet "/tmp/feishin-mount"
