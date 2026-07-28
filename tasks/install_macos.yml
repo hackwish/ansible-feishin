@@ -4,6 +4,8 @@
     url: https://api.github.com/repos/jeffvli/feishin/releases/latest
     method: GET
     return_content: true
+    headers:
+      Authorization: "Bearer {{ feishin_github_token }}"
   register: feishin_release_info
   when: feishin_version == 'latest'
 
@@ -23,17 +25,51 @@
     dest: "{{ feishin_tmp_archive }}"
     force: true
 
+- name: Detach any stale mount at mount point
+  command: hdiutil detach -quiet "/tmp/feishin-mount"
+  ignore_errors: true
+  changed_when: false
+
+- name: Remove stale mount point directory
+  file:
+    path: "/tmp/feishin-mount"
+    state: absent
+
+- name: Create fresh mount point directory
+  file:
+    path: "/tmp/feishin-mount"
+    state: directory
+
+- name: Check DMG file exists
+  stat:
+    path: "{{ feishin_tmp_archive }}"
+  register: feishin_dmg_stat
+
+- name: Fail if DMG file missing
+  fail:
+    msg: "DMG file not found at {{ feishin_tmp_archive }}. Download may have failed."
+  when: not feishin_dmg_stat.stat.exists
+
+- name: Validate downloaded DMG
+  command: file "{{ feishin_tmp_archive }}"
+  register: feishin_dmg_file_check
+  changed_when: false
+  failed_when: "'Apple Disk Image' not in feishin_dmg_file_check.stdout"
+
 - name: Mount Feishin DMG
-  command: hdiutil attach -nobrowse -quiet "{{ feishin_tmp_archive }}"
+  command: hdiutil attach -nobrowse -mountpoint "/tmp/feishin-mount" "{{ feishin_tmp_archive }}"
   register: feishin_dmg_attach
   changed_when: false
 
 - name: Copy Feishin app bundle to Applications
-  copy:
-    src: "{{ feishin_dmg_attach.stdout | regex_search('/Volumes/[^\\s]+') }}/Feishin.app"
-    dest: "/Applications/"
-    remote_src: true
+  command: ditto "/tmp/feishin-mount/Feishin.app" "/Applications/Feishin.app"
+  changed_when: true
 
 - name: Detach Feishin DMG
-  command: hdiutil detach -quiet "{{ feishin_dmg_attach.stdout | regex_search('/Volumes/[^\\s]+') }}"
+  command: hdiutil detach -quiet "/tmp/feishin-mount"
   changed_when: false
+
+- name: Remove mount point directory
+  file:
+    path: "/tmp/feishin-mount"
+    state: absent
