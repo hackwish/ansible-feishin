@@ -10,7 +10,7 @@ This role installs Feishin on Linux and macOS using the official GitHub release 
 
 ## Variables
 
-- `feishin_version`: release tag to install (`latest` by default)
+- `feishin_version`: release tag to install (`1.15.0` by default)
 - `feishin_install_dir`: installation directory (`/opt/feishin`)
 - `feishin_bin_path`: launcher path (`/usr/local/bin/feishin`)
 - `feishin_create_desktop_entry`: create a desktop entry on Linux (`true`)
@@ -23,7 +23,7 @@ This role installs Feishin on Linux and macOS using the official GitHub release 
   roles:
     - role: ansible-feishin
       vars:
-        feishin_version: latest
+        feishin_version: 1.15.0
 ```
 
 ## Testing

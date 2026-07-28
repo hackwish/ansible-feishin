@@ -1,5 +1,5 @@
 ---
-feishin_version: "latest"
+feishin_version: "1.15.0"
 feishin_install_dir: "/opt/feishin"
 feishin_bin_path: "/usr/bin/feishin"
 feishin_tmp_archive: "/tmp/feishin-package"
