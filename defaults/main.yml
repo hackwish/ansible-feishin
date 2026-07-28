@@ -6,3 +6,4 @@ feishin_tmp_archive: "/tmp/feishin-package"
 feishin_create_desktop_entry: true
 feishin_desktop_entry_path: "/usr/share/applications/Feishin.desktop"
 feishin_macos_app_path: "/Applications/Feishin.app"
+feishin_github_token: ""
