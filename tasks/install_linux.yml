@@ -9,7 +9,7 @@
 
 - name: Set Feishin release tag
   set_fact:
-    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default(feishin_version) }}"
+    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default('1.15.0') }}"
   when: feishin_version == 'latest'
 
 - name: Determine supported Linux architecture mapping
