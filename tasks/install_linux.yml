@@ -30,7 +30,7 @@
 
 - name: Download Debian/Ubuntu package
   get_url:
-    url: "https://github.com/jeffvli/feishin/releases/download/{{ feishin_release_tag }}/Feishin-linux-{{ feishin_linux_deb_arch }}.deb"
+    url: "https://github.com/jeffvli/feishin/releases/download/v{{ feishin_release_tag }}/Feishin-linux-{{ feishin_linux_deb_arch }}.deb"
     dest: "{{ feishin_tmp_archive }}"
     force: true
   when: ansible_facts['os_family'] == 'Debian'
