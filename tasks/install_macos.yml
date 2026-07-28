@@ -38,8 +38,19 @@
     path: "/tmp/feishin-mount"
     state: directory
 
+- name: Check DMG file exists
+  stat:
+    path: "{{ feishin_tmp_archive }}"
+  register: feishin_dmg_stat
+
+- name: Fail if DMG file missing
+  fail:
+    msg: "DMG file not found at {{ feishin_tmp_archive }}. Download may have failed."
+  when: not feishin_dmg_stat.stat.exists
+
 - name: Mount Feishin DMG
-  command: hdiutil attach -nobrowse -quiet -mountpoint "/tmp/feishin-mount" "{{ feishin_tmp_archive }}"
+  command: hdiutil attach -nobrowse -mountpoint "/tmp/feishin-mount" "{{ feishin_tmp_archive }}"
+  register: feishin_dmg_attach
   changed_when: false
 
 - name: Copy Feishin app bundle to Applications
