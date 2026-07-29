@@ -39,6 +39,7 @@
   apt:
     deb: "{{ feishin_tmp_archive }}"
     state: present
+    force: yes
   when: ansible_facts['os_family'] == 'Debian'
 
 - name: Ensure installation directory exists for AppImage
