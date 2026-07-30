@@ -11,8 +11,13 @@
 
 - name: Set Feishin release tag
   set_fact:
-    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default('1.15.0') }}"
+    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default('v' + feishin_version) }}"
   when: feishin_version == 'latest'
+
+- name: Set Feishin release tag from version
+  set_fact:
+    feishin_release_tag: "v{{ feishin_version }}"
+  when: feishin_version != 'latest'
 
 - name: Determine macOS DMG asset name
   set_fact:
@@ -21,7 +26,7 @@
 
 - name: Download Feishin DMG
   get_url:
-    url: "https://github.com/jeffvli/feishin/releases/download/v{{ feishin_release_tag }}/{{ feishin_macos_dmg_name }}"
+    url: "https://github.com/jeffvli/feishin/releases/download/{{ feishin_release_tag }}/{{ feishin_macos_dmg_name }}"
     dest: "{{ feishin_tmp_archive }}"
     force: true
 
