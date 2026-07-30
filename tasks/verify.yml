@@ -1,8 +1,15 @@
 ---
-- name: Check Feishin binary exists
+- name: Check Feishin binary exists (Linux)
   stat:
     path: "{{ feishin_bin_path }}"
   register: feishin_bin_stat
+  when: ansible_facts['os_family'] != 'Darwin'
+
+- name: Check Feishin app bundle exists (macOS)
+  stat:
+    path: "{{ feishin_macos_app_path }}"
+  register: feishin_bin_stat
+  when: ansible_facts['os_family'] == 'Darwin'
 
 - name: Assert Feishin is installed
   assert:
