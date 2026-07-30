@@ -59,7 +59,7 @@
   command: file "{{ feishin_tmp_archive }}"
   register: feishin_dmg_file_check
   changed_when: false
-  failed_when: "'Apple Disk Image' not in feishin_dmg_file_check.stdout"
+  failed_when: "'Apple Disk Image' not in feishin_dmg_file_check.stdout and 'zlib compressed data' not in feishin_dmg_file_check.stdout"
 
 - name: Mount Feishin DMG
   command: hdiutil attach -nobrowse -mountpoint "/tmp/feishin-mount" "{{ feishin_tmp_archive }}"
