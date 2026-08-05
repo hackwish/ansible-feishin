@@ -11,8 +11,13 @@
 
 - name: Set Feishin release tag
   set_fact:
-    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default('1.15.0') }}"
+    feishin_release_tag: "{{ feishin_release_info.json.tag_name | default('v' + feishin_version) }}"
   when: feishin_version == 'latest'
+
+- name: Set Feishin release tag from version
+  set_fact:
+    feishin_release_tag: "v{{ feishin_version }}"
+  when: feishin_version != 'latest'
 
 - name: Determine macOS DMG asset name
   set_fact:
@@ -21,7 +26,7 @@
 
 - name: Download Feishin DMG
   get_url:
-    url: "https://github.com/jeffvli/feishin/releases/download/v{{ feishin_release_tag }}/{{ feishin_macos_dmg_name }}"
+    url: "https://github.com/jeffvli/feishin/releases/download/{{ feishin_release_tag }}/{{ feishin_macos_dmg_name }}"
     dest: "{{ feishin_tmp_archive }}"
     force: true
 
@@ -54,7 +59,7 @@
   command: file "{{ feishin_tmp_archive }}"
   register: feishin_dmg_file_check
   changed_when: false
-  failed_when: "'Apple Disk Image' not in feishin_dmg_file_check.stdout"
+  failed_when: "'Apple Disk Image' not in feishin_dmg_file_check.stdout and 'zlib compressed data' not in feishin_dmg_file_check.stdout"
 
 - name: Mount Feishin DMG
   command: hdiutil attach -nobrowse -mountpoint "/tmp/feishin-mount" "{{ feishin_tmp_archive }}"
